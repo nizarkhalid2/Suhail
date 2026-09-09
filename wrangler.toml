@@ -1,0 +1,9 @@
+name = "suhail-travel-api"
+main = "suhail-api-worker.js"
+compatibility_date = "2026-09-10"
+
+[observability]
+enabled = true
+
+[secrets]
+required = ["DUFFEL_TOKEN"]
