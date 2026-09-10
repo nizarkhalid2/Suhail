@@ -7,3 +7,6 @@ enabled = true
 
 [secrets]
 required = ["DUFFEL_TOKEN"]
+[[mtls_certificates]]
+binding = "HOTELBEDS_MTLS"
+certificate_id = "6ab0007f-bc4b-40d3-a4f8-65e4af5c3aff"
