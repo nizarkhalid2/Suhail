@@ -1,4 +1,4 @@
-name = "suhail-travel-api"
+name = "suhail"
 main = "suhail-api-worker.js"
 compatibility_date = "2026-09-10"
 
@@ -6,7 +6,12 @@ compatibility_date = "2026-09-10"
 enabled = true
 
 [secrets]
-required = ["DUFFEL_TOKEN"]
+required = [
+  "DUFFEL_TOKEN",
+  "HOTELBEDS_API_KEY",
+  "HOTELBEDS_SECRET"
+]
+
 [[mtls_certificates]]
 binding = "HOTELBEDS_MTLS"
 certificate_id = "6ab0007f-bc4b-40d3-a4f8-65e4af5c3aff"
