@@ -48,9 +48,9 @@
   } catch(e) {}
 })();
 </script><script>window.SUHAIL_API_BASE="https://suhail.nizarkhalid321.workers.dev";</script>
-<!-- SUHAIL_RESPONSIVE_V5 -->
+<!-- SUHAIL_RESPONSIVE_V6 -->
 <style id="suhail-responsive-v5">
-/* Suhail responsive hardening V5 — mobile/tablet only. Desktop remains untouched. */
+/* Suhail responsive hardening V6 — mobile/tablet only. Desktop remains untouched. */
 html, body { max-width:100%; }
 body { margin:0; }
 
@@ -226,22 +226,46 @@ body { margin:0; }
   #root .suhail-mobile-stay-search {
     width:100% !important;
     max-width:100% !important;
+    min-width:0 !important;
     overflow:visible !important;
   }
   #root .suhail-mobile-stay-search > div:first-child,
-  #root .suhail-mobile-stay-search > div:first-child > div {
+  #root .suhail-mobile-stay-search > div:first-child > div,
+  #root .suhail-mobile-stay-search > div:first-child > div > div {
     width:100% !important;
     max-width:100% !important;
     min-width:0 !important;
   }
-  #root .suhail-mobile-stay-search select,
-  #root .suhail-mobile-stay-search input[type="date"],
-  #root .suhail-mobile-stay-search [data-suhail-guests] > button {
+  #root .suhail-mobile-stay-search [style*="display: grid"],
+  #root .suhail-mobile-stay-search [style*="display:grid"],
+  #root .suhail-mobile-stay-search [style*="display: flex"],
+  #root .suhail-mobile-stay-search [style*="display:flex"] {
     width:100% !important;
     max-width:100% !important;
     min-width:0 !important;
+  }
+  #root .suhail-mobile-stay-search > div:first-child > div {
+    overflow:hidden !important;
+    border-radius:18px !important;
+  }
+  #root .suhail-mobile-stay-search select,
+  #root .suhail-mobile-stay-search input[type="date"],
+  #root .suhail-mobile-stay-search input[type="text"],
+  #root .suhail-mobile-stay-search [data-suhail-guests] > button,
+  #root .suhail-mobile-stay-search button {
+    display:block !important;
+    inline-size:100% !important;
+    width:100% !important;
+    max-width:100% !important;
+    max-inline-size:100% !important;
+    min-width:0 !important;
     margin:0 !important;
+    margin-inline:0 !important;
     box-sizing:border-box !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests],
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div {
+    overflow:visible !important;
   }
 
   /* iOS Safari otherwise lets native date controls exceed their grid cell. */
@@ -260,6 +284,11 @@ body { margin:0; }
   #root input[type="date"]::-webkit-date-and-time-value {
     min-width:0 !important;
     text-align:center !important;
+  }
+  #root .suhail-mobile-stay-search select,
+  #root .suhail-mobile-stay-search input[type="date"] {
+    overflow:hidden !important;
+    border-radius:16px !important;
   }
 
   /* Flight traveller counter: full-width, balanced and easy to tap. */
