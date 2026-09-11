@@ -48,9 +48,9 @@
   } catch(e) {}
 })();
 </script><script>window.SUHAIL_API_BASE="https://suhail.nizarkhalid321.workers.dev";</script>
-<!-- SUHAIL_RESPONSIVE_V6 -->
+<!-- SUHAIL_RESPONSIVE_V7 -->
 <style id="suhail-responsive-v6">
-/* Suhail responsive hardening V6 — mobile/tablet only. Desktop remains untouched. */
+/* Suhail responsive hardening V7 — mobile/tablet only. Desktop remains untouched. */
 html, body { max-width:100%; }
 body { margin:0; }
 
@@ -360,6 +360,66 @@ body { margin:0; }
     padding:9px 6px !important;
     font-size:11.5px !important;
     white-space:nowrap !important;
+  }
+
+  /* Guest/room popup: preserve Arabic labels and keep controls in one row. */
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    padding:14px 16px !important;
+    overflow:visible !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div > div {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:center !important;
+    gap:14px !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div > div > span:first-child {
+    min-width:72px !important;
+    width:auto !important;
+    max-width:none !important;
+    white-space:nowrap !important;
+    overflow-wrap:normal !important;
+    word-break:normal !important;
+    text-align:start !important;
+    line-height:1.35 !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div > div > div {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap:12px !important;
+    width:auto !important;
+    min-width:max-content !important;
+    max-width:none !important;
+    flex:0 0 auto !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div > div > div > button {
+    display:flex !important;
+    width:36px !important;
+    min-width:36px !important;
+    max-width:36px !important;
+    height:36px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border-radius:50% !important;
+    align-items:center !important;
+    justify-content:center !important;
+    line-height:1 !important;
+  }
+  #root .suhail-mobile-stay-search [data-suhail-guests] > div > div > div > span {
+    display:block !important;
+    width:28px !important;
+    min-width:28px !important;
+    max-width:28px !important;
+    white-space:nowrap !important;
+    overflow-wrap:normal !important;
+    word-break:normal !important;
+    text-align:center !important;
   }
 }
 
