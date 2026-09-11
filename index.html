@@ -48,6 +48,166 @@
   } catch(e) {}
 })();
 </script><script>window.SUHAIL_API_BASE="https://suhail.nizarkhalid321.workers.dev";</script>
+<!-- SUHAIL_RESPONSIVE_V4 -->
+<style id="suhail-responsive-v4">
+/* Suhail responsive hardening — mobile/tablet only. Desktop remains untouched. */
+html, body { max-width:100%; }
+body { margin:0; }
+
+@media (max-width: 900px) {
+  /* Results sidebar: never squeeze the content on tablets/small laptops. */
+  #root [style*="grid-template-columns: 240px 1fr"] {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+  #root aside > div[style*="position: sticky"] {
+    position:relative !important;
+    top:auto !important;
+  }
+}
+
+@media (max-width: 719px) {
+  html, body {
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:hidden !important;
+    -webkit-text-size-adjust:100%;
+  }
+  body { min-width:0 !important; }
+  #root, #root > div {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:hidden !important;
+  }
+  #root * { box-sizing:border-box; min-width:0; }
+  #root img, #root video, #root canvas, #root svg { max-width:100%; }
+  #root input, #root select, #root textarea, #root button { max-width:100%; }
+  #root input[type="date"], #root input[type="text"], #root input[type="email"],
+  #root input[type="password"], #root input[type="tel"], #root select, #root textarea {
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  /* Keep all page shells inside the phone viewport. */
+  #root [style*="max-width: 1060px"],
+  #root [style*="max-width: 880px"],
+  #root [style*="max-width: 760px"],
+  #root [style*="max-width: 600px"],
+  #root [style*="max-width: 500px"],
+  #root [style*="max-width: 420px"],
+  #root [style*="max-width: 360px"] {
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  /* Main search (home + results): stack every control cleanly. */
+  #root [style*="grid-template-columns: 1.4fr 1fr 1fr 1fr auto"],
+  #root [style*="grid-template-columns: 1.4fr 1fr 1fr 1fr"] {
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:10px !important;
+  }
+
+  /* Results/filter, details, payment, dashboard, flights and packages. */
+  #root [style*="grid-template-columns: 240px 1fr"],
+  #root [style*="grid-template-columns: 200px 1fr"],
+  #root [style*="grid-template-columns: 2fr 1fr 1fr"],
+  #root [style*="grid-template-columns: 1fr auto 1fr"],
+  #root [style*="grid-template-columns: 1fr 1fr auto"],
+  #root [style*="grid-template-columns: 1fr 1fr 1fr"],
+  #root [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+  #root [style*="grid-template-columns: repeat(auto-fill, minmax(300px,1fr))"],
+  #root [style*="grid-template-columns: repeat(auto-fill, minmax(280px,1fr))"],
+  #root [style*="grid-template-columns: repeat(auto-fit, minmax(280px,1fr))"] {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  /* Compact result filter becomes a normal full-width block. */
+  #root aside { width:100% !important; max-width:100% !important; }
+  #root aside > div[style*="position: sticky"] {
+    position:relative !important;
+    top:auto !important;
+    width:100% !important;
+  }
+
+  /* Guest/room chooser stays inside screen even near an edge. */
+  #root [data-suhail-guests] { width:100% !important; }
+  #root [data-suhail-guests] > div[style*="position: absolute"] {
+    width:min(220px, calc(100vw - 44px)) !important;
+    max-width:calc(100vw - 44px) !important;
+    inset-inline-end:0 !important;
+    inset-inline-start:auto !important;
+  }
+
+  /* Result toolbars/tabs: wrap instead of creating horizontal overflow. */
+  #root [style*="display: inline-flex"] {
+    max-width:100% !important;
+    flex-wrap:wrap !important;
+  }
+  #root [style*="display: flex"][style*="justify-content: space-between"] {
+    max-width:100% !important;
+  }
+  #root [style*="overflow-x: auto"] {
+    max-width:100% !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Hotel/car cards and room rows: do not force desktop minimum widths. */
+  #root [style*="min-width: 200px"] { min-width:0 !important; }
+  #root [style*="min-width: 220px"] { min-width:0 !important; }
+  #root [style*="min-width: 240px"] { min-width:0 !important; }
+  #root [style*="min-width: 280px"] { min-width:0 !important; }
+
+  /* Sticky checkout/booking CTA becomes a safe vertical mobile bar. */
+  #root [style*="position: sticky"][style*="bottom: 16px"] {
+    width:100% !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+  }
+  #root [style*="position: sticky"][style*="bottom: 16px"] > button,
+  #root [style*="position: sticky"][style*="bottom: 16px"] > div + button {
+    width:100% !important;
+  }
+
+  /* Large gallery/hero media should not feel oversized on phones. */
+  #root [style*="height: 280px"][style*="border-radius: 16px"] { height:220px !important; }
+  #root [style*="height: 240px"][style*="border-radius: 16px"] { height:210px !important; }
+
+  /* Safer paddings for narrow screens. */
+  #root section[style*="padding: 20px 18px 60px"],
+  #root div[style*="padding: 24px 18px 70px"],
+  #root div[style*="padding: 20px 18px 60px"] {
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  /* Flight forms: after grids stack, make utility buttons easy to tap. */
+  #root button[style*="width: 40px"][style*="height: 40px"] {
+    min-width:40px !important;
+  }
+
+  /* Prevent long names, references and emails from pushing cards wider. */
+  #root h1, #root h2, #root h3, #root p, #root span, #root div {
+    overflow-wrap:anywhere;
+  }
+
+  /* Developer connection widget is useful on desktop, but obstructs phones. */
+  #suhail-api-debug { display:none !important; }
+
+  /* Fixed feedback chip stays compact and does not overlap edge-safe areas. */
+  body > a[style*="position: fixed"], body > button[style*="position: fixed"] {
+    max-width:calc(100vw - 28px) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #root [style*="padding: 18px"] { padding-left:12px !important; padding-right:12px !important; }
+  #root [style*="font-size: 28px"] { font-size:25px !important; }
+  #root [style*="font-size: 30px"] { font-size:26px !important; }
+}
+</style>
+
 </head>
 <body>
   <div id="boot">
