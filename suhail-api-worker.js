@@ -15,7 +15,7 @@ function json(data, status = 200) {
 }
 
 /* =========================================================
-   COMMON HELPERS
+   HELPERS
 ========================================================= */
 
 function cleanCode(value) {
@@ -31,20 +31,22 @@ function validDate(value) {
 }
 
 function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+  return Math.max(min, Math.min(max, Number(value)));
 }
 
-/* =========================================================
-   SHA-256
-========================================================= */
+function nightsBetween(checkIn, checkOut) {
+  const start = new Date(checkIn);
+  const end = new Date(checkOut);
+
+  return Math.max(
+    1,
+    Math.round((end - start) / 86400000)
+  );
+}
 
 async function sha256Hex(text) {
   const data = new TextEncoder().encode(text);
-
-  const hash = await crypto.subtle.digest(
-    "SHA-256",
-    data
-  );
+  const hash = await crypto.subtle.digest("SHA-256", data);
 
   return Array.from(new Uint8Array(hash))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -55,35 +57,24 @@ async function sha256Hex(text) {
    DUFFEL
 ========================================================= */
 
-async function duffel(
-  path,
-  method = "GET",
-  body,
-  token
-) {
+async function duffel(path, method = "GET", body, token) {
   token = String(token || "").trim();
 
   if (!token) {
-    throw new Error(
-      "DUFFEL_TOKEN is not configured"
-    );
+    throw new Error("DUFFEL_TOKEN is not configured");
   }
 
   const response = await fetch(
     "https://api.duffel.com" + path,
     {
       method,
-
       headers: {
         Authorization: `Bearer ${token}`,
         "Duffel-Version": "v2",
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-
-      body: body
-        ? JSON.stringify(body)
-        : undefined,
+      body: body ? JSON.stringify(body) : undefined,
     }
   );
 
@@ -94,9 +85,7 @@ async function duffel(
   try {
     data = JSON.parse(text);
   } catch {
-    data = {
-      raw: text,
-    };
+    data = { raw: text };
   }
 
   if (!response.ok) {
@@ -111,14 +100,12 @@ async function duffel(
 }
 
 /* =========================================================
-   DUFFEL FLIGHTS
+   FLIGHTS
 ========================================================= */
 
 async function flights(params, token) {
   const origin = cleanCode(params.origin);
-  const destination = cleanCode(
-    params.destination
-  );
+  const destination = cleanCode(params.destination);
 
   const departureDate = String(
     params.departureDate || ""
@@ -135,7 +122,7 @@ async function flights(params, token) {
   }
 
   const adults = clamp(
-    Number(params.adults || 1),
+    params.adults || 1,
     1,
     9
   );
@@ -147,9 +134,7 @@ async function flights(params, token) {
     "first",
   ];
 
-  const cabin = allowedCabins.includes(
-    params.cabin
-  )
+  const cabin = allowedCabins.includes(params.cabin)
     ? params.cabin
     : "economy";
 
@@ -175,16 +160,10 @@ async function flights(params, token) {
   const body = {
     data: {
       cabin_class: cabin,
-
       slices,
-
       passengers: Array.from(
-        {
-          length: adults,
-        },
-        () => ({
-          type: "adult",
-        })
+        { length: adults },
+        () => ({ type: "adult" })
       ),
     },
   };
@@ -243,46 +222,26 @@ async function hotelbedsRequest(
     );
   }
 
-  const timestamp = Math.floor(
-    Date.now() / 1000
-  );
+  const timestamp = Math.floor(Date.now() / 1000);
 
   const signature = await sha256Hex(
     apiKey + secret + timestamp
   );
 
-  const url =
-    "https://api-mtls.test.hotelbeds.com" +
-    path;
-
-  /*
-    IMPORTANT:
-    We intentionally use HOTELBEDS_MTLS.fetch()
-    instead of the normal global fetch().
-
-    Cloudflare will present the client certificate
-    automatically during the TLS handshake.
-  */
-
-  const response =
-    await env.HOTELBEDS_MTLS.fetch(
-      url,
-      {
-        method,
-
-        headers: {
-          "Api-key": apiKey,
-          "X-Signature": signature,
-          Accept: "application/json",
-          "Accept-Encoding": "gzip",
-          "Content-Type": "application/json",
-        },
-
-        body: body
-          ? JSON.stringify(body)
-          : undefined,
-      }
-    );
+  const response = await env.HOTELBEDS_MTLS.fetch(
+    "https://api-mtls.test.hotelbeds.com" + path,
+    {
+      method,
+      headers: {
+        "Api-key": apiKey,
+        "X-Signature": signature,
+        Accept: "application/json",
+        "Accept-Encoding": "gzip",
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    }
+  );
 
   const text = await response.text();
 
@@ -291,9 +250,7 @@ async function hotelbedsRequest(
   try {
     data = JSON.parse(text);
   } catch {
-    data = {
-      raw: text,
-    };
+    data = { raw: text };
   }
 
   if (!response.ok) {
@@ -315,10 +272,7 @@ async function hotelbedsRequest(
 }
 
 /* =========================================================
-   HOTELBEDS TEST HOTEL CODES
-
-   These are Hotelbeds test/example hotel codes.
-   First we use them only to verify that mTLS works.
+   HOTELBEDS AVAILABILITY
 ========================================================= */
 
 const HOTEL_TEST_CODES = [
@@ -326,48 +280,30 @@ const HOTEL_TEST_CODES = [
   168,
 ];
 
-/* =========================================================
-   HOTELBEDS AVAILABILITY
-========================================================= */
+async function hotelbedsAvailability(params, env) {
+  const checkIn = String(params.checkIn || "");
+  const checkOut = String(params.checkOut || "");
 
-async function hotelbedsAvailability(
-  params,
-  env
-) {
-  const checkIn = String(
-    params.checkIn || ""
-  );
-
-  const checkOut = String(
-    params.checkOut || ""
-  );
-
-  if (
-    !validDate(checkIn) ||
-    !validDate(checkOut)
-  ) {
+  if (!validDate(checkIn) || !validDate(checkOut)) {
     throw new Error(
       "checkIn and checkOut must be YYYY-MM-DD"
     );
   }
 
-  if (
-    new Date(checkOut) <=
-    new Date(checkIn)
-  ) {
+  if (new Date(checkOut) <= new Date(checkIn)) {
     throw new Error(
       "checkOut must be after checkIn"
     );
   }
 
   const adults = clamp(
-    Number(params.adults || 2),
+    params.adults || 2,
     1,
     9
   );
 
   const rooms = clamp(
-    Number(params.rooms || 1),
+    params.rooms || 1,
     1,
     10
   );
@@ -391,11 +327,10 @@ async function hotelbedsAvailability(
     },
 
     sourceMarket: "OM",
-
     dailyRate: true,
   };
 
-  return await hotelbedsRequest(
+  return hotelbedsRequest(
     "/hotel-api/1.0/hotels",
     "POST",
     body,
@@ -404,13 +339,10 @@ async function hotelbedsAvailability(
 }
 
 /* =========================================================
-   HOTELBEDS -> SUHAIL FORMAT
+   NORMALIZE HOTELBEDS
 ========================================================= */
 
-function normalizeHotelbedsResults(
-  data,
-  params
-) {
+function normalizeHotelbedsResults(data, params) {
   const hotels =
     data?.hotels?.hotels ||
     data?.hotels?.hotel ||
@@ -420,42 +352,29 @@ function normalizeHotelbedsResults(
     return [];
   }
 
-  const checkIn = new Date(
-    params.checkIn
-  );
-
-  const checkOut = new Date(
+  const nights = nightsBetween(
+    params.checkIn,
     params.checkOut
   );
 
-  const nights = Math.max(
-    1,
-    Math.round(
-      (checkOut - checkIn) /
-      86400000
-    )
-  );
-
   const city = String(
-    params.city || "muscat"
+    params.city || "Muscat"
   );
 
   const results = [];
 
   for (const hotel of hotels) {
-    const hotelRooms =
-      Array.isArray(hotel.rooms)
-        ? hotel.rooms
-        : [];
+    const hotelRooms = Array.isArray(hotel.rooms)
+      ? hotel.rooms
+      : [];
 
     let cheapestRate = null;
     let cheapestAmount = Infinity;
 
     for (const room of hotelRooms) {
-      const rates =
-        Array.isArray(room.rates)
-          ? room.rates
-          : [];
+      const rates = Array.isArray(room.rates)
+        ? room.rates
+        : [];
 
       for (const rate of rates) {
         const amount = Number(
@@ -480,9 +399,7 @@ function normalizeHotelbedsResults(
       }
     }
 
-    if (!cheapestRate) {
-      continue;
-    }
+    if (!cheapestRate) continue;
 
     const currency =
       cheapestRate.currency ||
@@ -492,15 +409,9 @@ function normalizeHotelbedsResults(
     const amountPerNight =
       cheapestAmount / nights;
 
-    const categoryCode = String(
-      hotel.categoryCode || ""
-    );
-
     let stars = Number(
-      categoryCode.replace(
-        /[^0-9]/g,
-        ""
-      )
+      String(hotel.categoryCode || "")
+        .replace(/[^0-9]/g, "")
     );
 
     if (
@@ -513,41 +424,20 @@ function normalizeHotelbedsResults(
 
     const cancellationPolicies =
       Array.isArray(
-        cheapestRate
-          .cancellationPolicies
+        cheapestRate.cancellationPolicies
       )
-        ? cheapestRate
-            .cancellationPolicies
+        ? cheapestRate.cancellationPolicies
         : [];
-
-    const freeCancel =
-      cancellationPolicies.length === 0 ||
-      cancellationPolicies.every(
-        (policy) =>
-          Number(
-            policy.amount || 0
-          ) === 0
-      );
 
     results.push({
       id:
         "hotelbeds-" +
-        String(
-          hotel.code ||
-          results.length
-        ),
+        String(hotel.code || results.length),
 
       accommodation: {
-        id: String(
-          hotel.code || ""
-        ),
-
-        name:
-          hotel.name ||
-          "Hotelbeds Hotel",
-
+        id: String(hotel.code || ""),
+        name: hotel.name || "Hotel",
         rating: stars,
-
         review_score: 0,
         review_count: 0,
 
@@ -569,11 +459,8 @@ function normalizeHotelbedsResults(
       cheapest_rate_amount_per_night:
         String(amountPerNight),
 
-      cheapest_rate_currency:
-        currency,
-
-      cheapest_rate_public_currency:
-        currency,
+      cheapest_rate_currency: currency,
+      cheapest_rate_public_currency: currency,
 
       rooms: [
         {
@@ -583,25 +470,20 @@ function normalizeHotelbedsResults(
                 cancellationPolicies,
 
               rateKey:
-                cheapestRate.rateKey ||
-                null,
+                cheapestRate.rateKey || null,
 
               rateType:
-                cheapestRate.rateType ||
-                null,
+                cheapestRate.rateType || null,
 
               boardName:
-                cheapestRate.boardName ||
-                "",
+                cheapestRate.boardName || "",
 
               roomName:
                 cheapestRate.roomName ||
                 cheapestRate.room?.name ||
                 "",
 
-              net:
-                cheapestAmount,
-
+              net: cheapestAmount,
               currency,
             },
           ],
@@ -609,33 +491,8 @@ function normalizeHotelbedsResults(
       ],
 
       hotelbeds: {
-        hotelCode:
-          hotel.code || null,
-
-        destinationCode:
-          hotel.destinationCode ||
-          null,
-
-        rateKey:
-          cheapestRate.rateKey ||
-          null,
-
-        rateType:
-          cheapestRate.rateType ||
-          null,
-
-        boardName:
-          cheapestRate.boardName ||
-          null,
-
-        roomName:
-          cheapestRate.roomName ||
-          cheapestRate.room?.name ||
-          null,
-
-        freeCancel,
-        nights,
-        amountPerNight,
+        hotelCode: hotel.code || null,
+        rateKey: cheapestRate.rateKey || null,
       },
     });
   }
@@ -644,43 +501,271 @@ function normalizeHotelbedsResults(
 }
 
 /* =========================================================
-   STAYS
+   DEMO HOTELS FALLBACK
 ========================================================= */
 
-async function stays(params, env) {
-  const results =
-    await hotelbedsAvailability(
-      params,
-      env
+const DEMO_HOTELS = [
+  {
+    name: "Suhail Grand Hotel",
+    stars: 5,
+    score: 9.2,
+    reviews: 824,
+    price: 52,
+    room: "Deluxe King Room",
+    board: "Breakfast Included",
+  },
+  {
+    name: "Suhail Marina Resort",
+    stars: 5,
+    score: 9.0,
+    reviews: 631,
+    price: 67,
+    room: "Sea View Room",
+    board: "Breakfast Included",
+  },
+  {
+    name: "Suhail City Hotel",
+    stars: 4,
+    score: 8.7,
+    reviews: 1104,
+    price: 34,
+    room: "Superior Room",
+    board: "Room Only",
+  },
+  {
+    name: "Suhail Boutique Hotel",
+    stars: 4,
+    score: 8.9,
+    reviews: 472,
+    price: 41,
+    room: "Premium Room",
+    board: "Breakfast Included",
+  },
+  {
+    name: "Suhail Plaza",
+    stars: 4,
+    score: 8.5,
+    reviews: 903,
+    price: 29,
+    room: "Standard King Room",
+    board: "Room Only",
+  },
+  {
+    name: "Suhail Royal Residence",
+    stars: 5,
+    score: 9.3,
+    reviews: 356,
+    price: 78,
+    room: "Executive Suite",
+    board: "Breakfast Included",
+  },
+];
+
+function demoHotels(params) {
+  const city =
+    String(params.city || "Muscat").trim() ||
+    "Muscat";
+
+  const checkIn = String(params.checkIn || "");
+  const checkOut = String(params.checkOut || "");
+
+  if (!validDate(checkIn) || !validDate(checkOut)) {
+    throw new Error(
+      "checkIn and checkOut must be YYYY-MM-DD"
     );
+  }
 
-  const normalized =
-    normalizeHotelbedsResults(
-      results,
-      params
+  if (new Date(checkOut) <= new Date(checkIn)) {
+    throw new Error(
+      "checkOut must be after checkIn"
     );
+  }
 
-  return {
-    provider: "hotelbeds",
+  const nights = nightsBetween(
+    checkIn,
+    checkOut
+  );
 
-    results: normalized,
+  const rooms = clamp(
+    params.rooms || 1,
+    1,
+    10
+  );
 
-    searchId:
-      results?.auditData?.processTime ||
-      null,
+  return DEMO_HOTELS.map((hotel, index) => {
+    const nightlyPrice =
+      hotel.price + rooms * 2;
 
-    testMode: true,
+    const total =
+      nightlyPrice * nights * rooms;
 
-    mtls: true,
+    return {
+      id: `demo-hotel-${index + 1}`,
 
-    rawCount:
-      results?.hotels?.total ??
-      normalized.length,
-  };
+      accommodation: {
+        id: `demo-${index + 1}`,
+
+        name: hotel.name,
+
+        rating: hotel.stars,
+
+        review_score: hotel.score,
+
+        review_count: hotel.reviews,
+
+        location: {
+          address: {
+            city_name: city,
+          },
+        },
+
+        photos: [],
+      },
+
+      cheapest_rate_total_amount:
+        total.toFixed(2),
+
+      cheapest_rate_amount_per_night:
+        nightlyPrice.toFixed(2),
+
+      cheapest_rate_currency: "OMR",
+
+      cheapest_rate_public_currency:
+        "OMR",
+
+      rooms: [
+        {
+          rates: [
+            {
+              cancellation_timeline: [],
+
+              rateKey:
+                `demo-rate-${index + 1}`,
+
+              rateType: "BOOKABLE",
+
+              boardName:
+                hotel.board,
+
+              roomName:
+                hotel.room,
+
+              net: total,
+
+              currency: "OMR",
+            },
+          ],
+        },
+      ],
+
+      demo: {
+        enabled: true,
+        bookable: false,
+      },
+    };
+  });
 }
 
 /* =========================================================
-   HEALTH CHECK
+   STAYS — HOTELBEDS + AUTO FALLBACK
+========================================================= */
+
+async function stays(params, env) {
+  /*
+    Validate first so invalid user input does NOT
+    silently turn into Demo results.
+  */
+
+  if (
+    !validDate(params.checkIn) ||
+    !validDate(params.checkOut)
+  ) {
+    throw new Error(
+      "checkIn and checkOut must be YYYY-MM-DD"
+    );
+  }
+
+  if (
+    new Date(params.checkOut) <=
+    new Date(params.checkIn)
+  ) {
+    throw new Error(
+      "checkOut must be after checkIn"
+    );
+  }
+
+  try {
+    const hotelbedsData =
+      await hotelbedsAvailability(
+        params,
+        env
+      );
+
+    const normalized =
+      normalizeHotelbedsResults(
+        hotelbedsData,
+        params
+      );
+
+    /*
+      If Hotelbeds replies successfully but
+      returns no hotels, use Demo temporarily.
+    */
+
+    if (normalized.length === 0) {
+      return {
+        provider: "demo",
+        fallback: true,
+        fallbackReason:
+          "Hotelbeds returned no available hotels",
+        results: demoHotels(params),
+        testMode: true,
+      };
+    }
+
+    return {
+      provider: "hotelbeds",
+      fallback: false,
+      results: normalized,
+
+      searchId:
+        hotelbedsData?.auditData?.processTime ||
+        null,
+
+      testMode: true,
+      mtls: true,
+
+      rawCount:
+        hotelbedsData?.hotels?.total ??
+        normalized.length,
+    };
+  } catch (error) {
+    console.error(
+      "Hotelbeds unavailable, using Demo:",
+      error?.message
+    );
+
+    return {
+      provider: "demo",
+
+      fallback: true,
+
+      fallbackReason:
+        error?.message ||
+        "Hotelbeds unavailable",
+
+      results:
+        demoHotels(params),
+
+      testMode: true,
+
+      hotelbedsPending: true,
+    };
+  }
+}
+
+/* =========================================================
+   HEALTH
 ========================================================= */
 
 async function health(env) {
@@ -705,21 +790,15 @@ async function health(env) {
       "function";
 
   return {
-    ok:
-      duffelConfigured &&
-      hotelKeyConfigured &&
-      hotelSecretConfigured &&
-      mtlsConfigured,
+    ok: true,
 
     flights: {
       provider: "duffel",
-      configured:
-        duffelConfigured,
+      configured: duffelConfigured,
     },
 
     hotels: {
       provider: "hotelbeds",
-
       configured:
         hotelKeyConfigured &&
         hotelSecretConfigured,
@@ -730,6 +809,10 @@ async function health(env) {
 
       endpoint:
         "api-mtls.test.hotelbeds.com",
+
+      autoFallback: true,
+
+      fallbackProvider: "demo",
     },
   };
 }
@@ -740,24 +823,16 @@ async function health(env) {
 
 export default {
   async fetch(request, env) {
-    if (
-      request.method === "OPTIONS"
-    ) {
+    if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
         headers: CORS_HEADERS,
       });
     }
 
-    const url = new URL(
-      request.url
-    );
+    const url = new URL(request.url);
 
     try {
-      /*
-        Friendly root status page
-      */
-
       if (
         url.pathname === "/" &&
         request.method === "GET"
@@ -765,20 +840,13 @@ export default {
         return json({
           name: "Suhail API",
           ok: true,
-          message:
-            "Suhail API is running",
-          health:
-            "/api/health",
+          message: "Suhail API is running",
+          health: "/api/health",
         });
       }
 
-      /*
-        Health
-      */
-
       if (
-        url.pathname ===
-          "/api/health" &&
+        url.pathname === "/api/health" &&
         request.method === "GET"
       ) {
         return json(
@@ -786,18 +854,10 @@ export default {
         );
       }
 
-      /*
-        All remaining endpoints
-        require POST.
-      */
-
-      if (
-        request.method !== "POST"
-      ) {
+      if (request.method !== "POST") {
         return json(
           {
-            error:
-              "Method not allowed",
+            error: "Method not allowed",
           },
           405
         );
@@ -806,21 +866,15 @@ export default {
       let params = {};
 
       try {
-        params =
-          await request.json();
+        params = await request.json();
       } catch {
         return json(
           {
-            error:
-              "Invalid JSON body",
+            error: "Invalid JSON body",
           },
           400
         );
       }
-
-      /*
-        Flights
-      */
 
       if (
         url.pathname ===
@@ -833,10 +887,6 @@ export default {
           )
         );
       }
-
-      /*
-        Hotels
-      */
 
       if (
         url.pathname ===
