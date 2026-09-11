@@ -48,9 +48,9 @@
   } catch(e) {}
 })();
 </script><script>window.SUHAIL_API_BASE="https://suhail.nizarkhalid321.workers.dev";</script>
-<!-- SUHAIL_RESPONSIVE_V4 -->
-<style id="suhail-responsive-v4">
-/* Suhail responsive hardening — mobile/tablet only. Desktop remains untouched. */
+<!-- SUHAIL_RESPONSIVE_V5 -->
+<style id="suhail-responsive-v5">
+/* Suhail responsive hardening V5 — mobile/tablet only. Desktop remains untouched. */
 html, body { max-width:100%; }
 body { margin:0; }
 
@@ -143,7 +143,6 @@ body { margin:0; }
   /* Result toolbars/tabs: wrap instead of creating horizontal overflow. */
   #root [style*="display: inline-flex"] {
     max-width:100% !important;
-    flex-wrap:wrap !important;
   }
   #root [style*="display: flex"][style*="justify-content: space-between"] {
     max-width:100% !important;
@@ -201,10 +200,126 @@ body { margin:0; }
   }
 }
 
+@media (max-width: 719px) {
+  /* Main product tabs: always one clean row on phones. */
+  #root .suhail-mobile-main-tabs {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    width:100% !important;
+    max-width:100% !important;
+    gap:3px !important;
+    padding:4px !important;
+    flex-wrap:nowrap !important;
+    overflow:hidden !important;
+  }
+  #root .suhail-mobile-main-tabs > button {
+    width:100% !important;
+    min-width:0 !important;
+    padding:9px 5px !important;
+    font-size:11.5px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  /* Stay search: every row must line up to the same inner edges. */
+  #root .suhail-mobile-stay-search {
+    width:100% !important;
+    max-width:100% !important;
+    overflow:visible !important;
+  }
+  #root .suhail-mobile-stay-search > div:first-child,
+  #root .suhail-mobile-stay-search > div:first-child > div {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+  #root .suhail-mobile-stay-search select,
+  #root .suhail-mobile-stay-search input[type="date"],
+  #root .suhail-mobile-stay-search [data-suhail-guests] > button {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  /* iOS Safari otherwise lets native date controls exceed their grid cell. */
+  #root input[type="date"] {
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    font-size:16px !important;
+    line-height:1.2 !important;
+    height:48px !important;
+    padding:11px 12px !important;
+  }
+  #root input[type="date"]::-webkit-date-and-time-value {
+    min-width:0 !important;
+    text-align:center !important;
+  }
+
+  /* Flight traveller counter: full-width, balanced and easy to tap. */
+  #root .suhail-mobile-flight-pax {
+    width:100% !important;
+    max-width:100% !important;
+  }
+  #root .suhail-mobile-flight-pax > div {
+    display:grid !important;
+    grid-template-columns:52px minmax(0,1fr) 52px !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    direction:ltr !important;
+    border-radius:12px !important;
+  }
+  #root .suhail-mobile-flight-pax > div > button {
+    width:52px !important;
+    min-width:52px !important;
+    height:48px !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:20px !important;
+  }
+  #root .suhail-mobile-flight-pax > div > span {
+    width:100% !important;
+    min-width:0 !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:16px !important;
+  }
+
+  /* Flight one-way/round/multi tabs stay in one line as well. */
+  #root .suhail-mobile-flight-type-tabs {
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    width:100% !important;
+    max-width:100% !important;
+    gap:3px !important;
+    flex-wrap:nowrap !important;
+  }
+  #root .suhail-mobile-flight-type-tabs > button {
+    width:100% !important;
+    min-width:0 !important;
+    padding:9px 6px !important;
+    font-size:11.5px !important;
+    white-space:nowrap !important;
+  }
+}
+
 @media (max-width: 390px) {
   #root [style*="padding: 18px"] { padding-left:12px !important; padding-right:12px !important; }
   #root [style*="font-size: 28px"] { font-size:25px !important; }
   #root [style*="font-size: 30px"] { font-size:26px !important; }
+  #root .suhail-mobile-main-tabs > button,
+  #root .suhail-mobile-flight-type-tabs > button { font-size:10.5px !important; padding-left:3px !important; padding-right:3px !important; }
 }
 </style>
 
@@ -513,6 +628,57 @@ react/cjs/react-jsx-runtime.production.js:
     health();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ready); else ready();
+})();
+</script>
+
+<script id="suhail-mobile-layout-annotator">
+(function(){
+  'use strict';
+  function norm(x){return String(x||'').replace(/\s+/g,' ').trim().toLowerCase()}
+  function hasAll(text,words){return words.every(function(w){return text.indexOf(w)>=0})}
+  function mark(){
+    if(window.innerWidth>719) return;
+    try{
+      var all=[].slice.call(document.querySelectorAll('#root div'));
+      all.forEach(function(el){
+        var btns=[].slice.call(el.children||[]).filter(function(n){return n.tagName==='BUTTON'});
+        if(btns.length===4){
+          var t=norm(btns.map(function(b){return b.textContent}).join(' | '));
+          var ar=(t.indexOf('إقامات')>=0&&t.indexOf('سيارات')>=0&&t.indexOf('طيران')>=0&&t.indexOf('باقات')>=0);
+          var en=(t.indexOf('stays')>=0&&t.indexOf('cars')>=0&&t.indexOf('flights')>=0&&t.indexOf('packages')>=0);
+          if(ar||en) el.classList.add('suhail-mobile-main-tabs');
+        }
+        if(btns.length===3){
+          var ft=norm(btns.map(function(b){return b.textContent}).join(' | '));
+          var far=(ft.indexOf('ذهاب')>=0&&ft.indexOf('ذهاب وعودة')>=0&&ft.indexOf('وجهات متعددة')>=0);
+          var fen=(ft.indexOf('one way')>=0&&ft.indexOf('round trip')>=0&&ft.indexOf('multi-city')>=0);
+          if(far||fen) el.classList.add('suhail-mobile-flight-type-tabs');
+        }
+      });
+
+      var buttons=[].slice.call(document.querySelectorAll('#root button'));
+      buttons.forEach(function(b){
+        var t=norm(b.textContent);
+        if(t.indexOf('ابحث عن مرساك')>=0 || t.indexOf('search for your harbour')>=0 || t.indexOf('search stays')>=0){
+          var p=b.parentElement;
+          if(p) p.classList.add('suhail-mobile-stay-search');
+        }
+      });
+
+      var labels=[].slice.call(document.querySelectorAll('#root label'));
+      labels.forEach(function(l){
+        var t=norm(l.textContent);
+        if(t==='المسافرون' || t==='travellers' || t==='travelers'){
+          var p=l.parentElement;
+          if(p) p.classList.add('suhail-mobile-flight-pax');
+        }
+      });
+    }catch(e){}
+  }
+  var mo=new MutationObserver(function(){mark()});
+  function boot(){mark();mo.observe(document.getElementById('root')||document.body,{childList:true,subtree:true});}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.addEventListener('resize',mark);
 })();
 </script>
 </body>
